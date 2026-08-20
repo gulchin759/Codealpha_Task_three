@@ -1,4 +1,4 @@
-
+Stock Trading Platform
 ### ⚙️ Backend Features
 
 * **JWT Authentication & Authorization** with Spring Security.
