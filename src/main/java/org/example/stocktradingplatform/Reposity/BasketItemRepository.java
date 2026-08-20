@@ -14,4 +14,9 @@ public interface BasketItemRepository extends JpaRepository<BasketItem, Long> {
     );
 
 
-    List<BasketItem> findByBasket_Userr_Id(Long userId);}
+    List<BasketItem> findByBasket_Userr_Id(Long userId);
+
+    void deleteByProductId(Long productId);
+
+    void deleteByBasketId(Long basketId);
+}

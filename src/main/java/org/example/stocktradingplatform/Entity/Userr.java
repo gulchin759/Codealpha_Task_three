@@ -22,9 +22,13 @@ public class Userr {
     private  String surname;
     private  String age;
     private String phoneNumber;
+    @Column(unique = true, nullable = false)
     private  String email;
     private BigDecimal balance;
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 
     @OneToMany(mappedBy = "userr")

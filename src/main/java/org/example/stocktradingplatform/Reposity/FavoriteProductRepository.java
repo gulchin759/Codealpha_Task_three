@@ -21,4 +21,7 @@ public interface FavoriteProductRepository extends JpaRepository<FavoriteProduct
             String name
     );
 
+    void deleteByProductId(Long productId);
+
+    void deleteByFavoriteId(Long favoriteId);
 }

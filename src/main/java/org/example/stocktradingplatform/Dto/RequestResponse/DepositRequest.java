@@ -11,18 +11,6 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
-public class UserRequestDto {
-
-    private String name;
-    private  String surname;
-    private  String age;
-    private String phoneNumber;
-    private  String email;
-    private BigDecimal balance;
-    private String password;
-
-
-
-
+public class DepositRequest {
+    private BigDecimal amount;
 }

@@ -16,9 +16,11 @@ import java.math.BigDecimal;
 
 public class ProductResponse {
 
-    private  String name;
+    private Long id;
+    private String name;
     private BigDecimal price;
-    private  String image;
+    private int stock;
+    private String image;
 
     @Enumerated(EnumType.STRING)
     private ProductCategory productCategory;

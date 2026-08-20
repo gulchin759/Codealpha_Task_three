@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrading.io - Smart Market & Trading Platform</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Modern Professional CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- Toast Notifications Floating Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <!-- Brand Logo -->
+            <div class="nav-brand" onclick="app.handleBrandClick()">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">StockTrading<span class="brand-accent">.io</span></span>
+                    <span class="brand-subtitle">Smart Market & Trading</span>
+                </div>
+            </div>
+
+            <!-- Global Search Box (Marketplace only) -->
+            <div class="nav-search" id="global-nav-search">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="global-search" placeholder="Search products, groceries, snacks..." oninput="app.handleSearch(this.value)">
+                <button id="search-clear-btn" class="search-clear" onclick="app.clearSearch()" style="display:none;" title="Clear search">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Role-Aware Navigation Links -->
+            <nav class="nav-links" id="main-nav-links">
+                <!-- User Links (Hidden for Admin) -->
+                <button class="nav-btn active" id="tab-btn-market" onclick="app.showTab('market')">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Marketplace</span>
+                </button>
+                <button class="nav-btn" id="tab-btn-favorites" onclick="app.showTab('favorites')">
+                    <i class="fa-solid fa-heart"></i>
+                    <span>Wishlist</span>
+                    <span class="badge badge-fav" id="fav-count-badge">0</span>
+                </button>
+                <button class="nav-btn" id="tab-btn-basket" onclick="app.openCartModal()">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Cart</span>
+                    <span class="badge badge-cart" id="cart-count-badge">0</span>
+                </button>
+
+                <!-- Admin Link (Visible ONLY for Admin) -->
+                <button class="nav-btn admin-nav-btn" id="tab-btn-admin" onclick="app.showTab('admin')" style="display: none;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Admin Hub</span>
+                </button>
+            </nav>
+
+            <!-- Authentication / User Status -->
+            <div class="nav-auth" id="nav-auth-section">
+                <!-- Populated dynamically by JavaScript -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Quick Demo Access Bar -->
+    <div class="demo-banner" id="demo-banner">
+        <div class="demo-banner-content">
+            <div class="demo-info">
+                <span class="demo-pill"><i class="fa-solid fa-bolt"></i> Demo Credentials</span>
+                <span>System Admin Account: <strong>admin@stock.com</strong> / <strong>admin123</strong></span>
+            </div>
+            <div class="demo-actions">
+                <button class="btn btn-sm btn-admin-quick" onclick="app.quickAdminLogin()">
+                    <i class="fa-solid fa-user-shield"></i> 1-Click Admin Login
+                </button>
+                <button class="btn btn-sm btn-outline" onclick="app.openAuthModal('register')">
+                    <i class="fa-solid fa-user-plus"></i> Register Customer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <!-- ==================== USER TAB 1: MARKETPLACE ==================== -->
+        <section id="tab-market" class="tab-content active">
+            <!-- Market Hero Banner -->
+            <div class="market-hero">
+                <div class="market-title-group">
+                    <span class="section-tag tag-primary"><i class="fa-solid fa-sparkles"></i> Live Catalog</span>
+                    <h2>Explore Products & Stocks</h2>
+                    <p class="text-muted">Browse fresh stock, live inventory levels, and fast virtual checkout.</p>
+                </div>
+                <div class="market-controls">
+                    <div class="custom-select-wrapper">
+                        <i class="fa-solid fa-arrow-down-short-wide select-icon"></i>
+                        <select id="sort-select" onchange="app.handleSort(this.value)">
+                            <option value="default">Sort: Default Order</option>
+                            <option value="price-asc">Price: Low to High ↑</option>
+                            <option value="price-desc">Price: High to Low ↓</option>
+                            <option value="name-asc">Name: A to Z</option>
+                            <option value="name-desc">Name: Z to A</option>
+                            <option value="stock-desc">Stock: Highest Available</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Pills Bar -->
+            <div class="category-scroll-container">
+                <div class="category-pills" id="category-pills">
+                    <button class="category-pill active" onclick="app.filterCategory('ALL')">
+                        <i class="fa-solid fa-border-all"></i> All Products
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('DAIRY_PRODUCTS')">
+                        <i class="fa-solid fa-cheese"></i> Dairy Products
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('MEAT')">
+                        <i class="fa-solid fa-drumstick-bite"></i> Meat & Poultry
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('VEGETABLES')">
+                        <i class="fa-solid fa-carrot"></i> Fresh Vegetables
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('FRUITS')">
+                        <i class="fa-solid fa-apple-whole"></i> Organic Fruits
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('BAKERY')">
+                        <i class="fa-solid fa-bread-slice"></i> Bakery & Bread
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('BEVERAGES')">
+                        <i class="fa-solid fa-mug-hot"></i> Beverages
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('SNACKS')">
+                        <i class="fa-solid fa-cookie"></i> Snacks & Bites
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('FROZEN_FOOD')">
+                        <i class="fa-solid fa-snowflake"></i> Frozen Foods
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('CANNED_FOOD')">
+                        <i class="fa-solid fa-box-archive"></i> Canned Goods
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('CLEANING_PRODUCTS')">
+                        <i class="fa-solid fa-soap"></i> Cleaning Supplies
+                    </button>
+                    <button class="category-pill" onclick="app.filterCategory('PERSONAL_CARE')">
+                        <i class="fa-solid fa-pump-soap"></i> Personal Care
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Products Grid -->
+            <div class="products-grid" id="products-grid">
+                <div class="loading-state">
+                    <div class="spinner-ring"></div>
+                    <p>Loading products...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== USER TAB 2: WISHLIST ==================== -->
+        <section id="tab-favorites" class="tab-content" style="display: none;">
+            <div class="section-hero">
+                <div class="section-title-wrap">
+                    <span class="section-tag tag-fav"><i class="fa-solid fa-heart"></i> Saved Items</span>
+                    <h2>My Wishlist</h2>
+                    <p class="text-muted">Your favorite items are saved here. Add them to your cart in one click.</p>
+                </div>
+            </div>
+            <div class="products-grid" id="favorites-grid">
+                <!-- Dynamically rendered by JavaScript -->
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: ADMIN HUB (ONLY PRODUCTS & USERS) ==================== -->
+        <section id="tab-admin" class="tab-content" style="display: none;">
+            <div class="admin-dashboard-card">
+                <div class="admin-card-header">
+                    <div>
+                        <span class="section-tag tag-admin"><i class="fa-solid fa-shield-halved"></i> Admin Control Center</span>
+                        <h2>Management Dashboard</h2>
+                        <p class="text-muted">Manage product catalog inventory and registered platform users.</p>
+                    </div>
+                    <div class="admin-top-actions">
+                        <button class="btn btn-primary btn-glow" id="admin-add-prod-btn" onclick="app.openAddProductModal()">
+                            <i class="fa-solid fa-plus"></i> Add New Product
+                        </button>
+                        <button class="btn btn-accent btn-glow" id="admin-add-user-btn" onclick="app.openAddUserModal()" style="display: none;">
+                            <i class="fa-solid fa-user-plus"></i> Add New User
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Subtab Navigation (Only Products and Users) -->
+                <div class="admin-tab-nav">
+                    <button class="admin-nav-item active" id="admin-nav-products-btn" onclick="app.switchAdminSubtab('products')">
+                        <i class="fa-solid fa-boxes-stacked"></i> Products Inventory (<span id="admin-prod-count">0</span>)
+                    </button>
+                    <button class="admin-nav-item" id="admin-nav-users-btn" onclick="app.switchAdminSubtab('users')">
+                        <i class="fa-solid fa-users"></i> Registered Users (<span id="admin-user-count">0</span>)
+                    </button>
+                </div>
+
+                <!-- ADMIN SUBTAB 1: PRODUCTS INVENTORY -->
+                <div id="admin-subtab-products" class="admin-subtab-panel active">
+                    <!-- Products Search & Filter Toolbar -->
+                    <div class="admin-toolbar">
+                        <!-- Search by name -->
+                        <div class="admin-search-input">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="admin-prod-search" placeholder="Search product by title..." oninput="app.handleAdminProductSearch(this.value)">
+                        </div>
+
+                        <!-- Category Filter -->
+                        <div class="admin-filter-select">
+                            <i class="fa-solid fa-filter"></i>
+                            <select id="admin-prod-category" onchange="app.handleAdminProductCategory(this.value)">
+                                <option value="ALL">All Categories</option>
+                                <option value="DAIRY_PRODUCTS">Dairy Products</option>
+                                <option value="MEAT">Meat & Poultry</option>
+                                <option value="VEGETABLES">Fresh Vegetables</option>
+                                <option value="FRUITS">Organic Fruits</option>
+                                <option value="BAKERY">Bakery & Bread</option>
+                                <option value="BEVERAGES">Beverages</option>
+                                <option value="SNACKS">Snacks & Bites</option>
+                                <option value="FROZEN_FOOD">Frozen Foods</option>
+                                <option value="CANNED_FOOD">Canned Goods</option>
+                                <option value="CLEANING_PRODUCTS">Cleaning Supplies</option>
+                                <option value="PERSONAL_CARE">Personal Care</option>
+                            </select>
+                        </div>
+
+                        <!-- Sort: Low to High / High to Low -->
+                        <div class="admin-sort-select">
+                            <i class="fa-solid fa-arrow-down-short-wide"></i>
+                            <select id="admin-prod-sort" onchange="app.handleAdminProductSort(this.value)">
+                                <option value="default">Sort: Default Order</option>
+                                <option value="price-asc">Price: Low to High ↑</option>
+                                <option value="price-desc">Price: High to Low ↓</option>
+                                <option value="name-asc">Name: A to Z</option>
+                                <option value="name-desc">Name: Z to A</option>
+                                <option value="stock-desc">Stock: High to Low</option>
+                                <option value="stock-asc">Stock: Low to High</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Products Modern Table -->
+                    <div class="custom-table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Thumbnail</th>
+                                    <th>Product Title</th>
+                                    <th>Category</th>
+                                    <th>Unit Price</th>
+                                    <th>Stock Level</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-products-table-body">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ADMIN SUBTAB 2: USERS LIST -->
+                <div id="admin-subtab-users" class="admin-subtab-panel" style="display: none;">
+                    <!-- Users Search Toolbar -->
+                    <div class="admin-toolbar">
+                        <div class="admin-search-input">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="admin-user-search" placeholder="Search users by name, email or phone..." oninput="app.handleAdminUserSearch(this.value)">
+                        </div>
+
+                        <div class="admin-sort-select">
+                            <i class="fa-solid fa-arrow-down-short-wide"></i>
+                            <select id="admin-user-sort" onchange="app.handleAdminUserSort(this.value)">
+                                <option value="default">Sort: ID Order</option>
+                                <option value="name-asc">Name: A to Z</option>
+                                <option value="name-desc">Name: Z to A</option>
+                                <option value="balance-desc">Balance: High to Low ↓</option>
+                                <option value="balance-asc">Balance: Low to High ↑</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Users Modern Table -->
+                    <div class="custom-table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Full Name</th>
+                                    <th>Email Address</th>
+                                    <th>Phone / Age</th>
+                                    <th>Assigned Role</th>
+                                    <th>Wallet Balance</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-table-body">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== MODAL: CART & PAYMENT ==================== -->
+    <div class="modal-backdrop" id="cart-modal">
+        <div class="modal-card cart-modal-dialog">
+            <div class="modal-head">
+                <div class="modal-head-title">
+                    <div class="modal-head-icon icon-emerald"><i class="fa-solid fa-basket-shopping"></i></div>
+                    <div>
+                        <h3>Shopping Cart</h3>
+                        <span class="modal-subtitle">Review items and proceed to checkout</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="app.closeCartModal()" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-content-body" id="cart-modal-body">
+                <!-- Cart items rendered here -->
+            </div>
+            <div class="modal-foot" id="cart-modal-footer">
+                <!-- Cart summary & Pay button rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: AUTHENTICATION (LOGIN / REGISTER) ==================== -->
+    <div class="modal-backdrop" id="auth-modal">
+        <div class="modal-card auth-modal-dialog">
+            <div class="modal-head">
+                <div class="modal-head-title">
+                    <div class="modal-head-icon icon-indigo"><i class="fa-solid fa-user-shield"></i></div>
+                    <div>
+                        <h3 id="auth-modal-title">Sign In</h3>
+                        <span class="modal-subtitle">Access your trading account & orders</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="app.closeAuthModal()" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-content-body">
+                <!-- Tab Selector -->
+                <div class="auth-segmented-control">
+                    <button class="auth-segment active" id="auth-tab-login" onclick="app.switchAuthMode('login')">Sign In</button>
+                    <button class="auth-segment" id="auth-tab-register" onclick="app.switchAuthMode('register')">Create Account</button>
+                </div>
+
+                <!-- SIGN IN FORM -->
+                <form id="login-form" onsubmit="app.handleLogin(event)">
+                    <div class="input-field-group">
+                        <label><i class="fa-regular fa-envelope"></i> Email Address</label>
+                        <input type="email" id="login-email" required placeholder="user@domain.com">
+                    </div>
+                    <div class="input-field-group">
+                        <label><i class="fa-solid fa-lock"></i> Password</label>
+                        <input type="password" id="login-password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg btn-glow">
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In to Account
+                    </button>
+                </form>
+
+                <!-- SIGN UP FORM (Uses UserRequestDto fields) -->
+                <form id="register-form" onsubmit="app.handleRegister(event)" style="display: none;">
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label>First Name</label>
+                            <input type="text" id="reg-name" required placeholder="e.g. John">
+                        </div>
+                        <div class="input-field-group">
+                            <label>Last Name</label>
+                            <input type="text" id="reg-surname" required placeholder="e.g. Doe">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label>Age</label>
+                            <input type="number" id="reg-age" placeholder="25" min="1" max="120">
+                        </div>
+                        <div class="input-field-group">
+                            <label>Phone Number</label>
+                            <input type="text" id="reg-phone" placeholder="+1234567890">
+                        </div>
+                    </div>
+                    <div class="input-field-group">
+                        <label><i class="fa-regular fa-envelope"></i> Email Address</label>
+                        <input type="email" id="reg-email" required placeholder="john.doe@example.com">
+                    </div>
+                    <div class="input-field-group">
+                        <label><i class="fa-solid fa-lock"></i> Password</label>
+                        <input type="password" id="reg-password" required minlength="4" placeholder="Minimum 4 characters">
+                    </div>
+                    <div class="input-field-group">
+                        <label><i class="fa-solid fa-wallet"></i> Initial Balance ($)</label>
+                        <input type="number" id="reg-balance" value="1000" min="0" step="0.5">
+                    </div>
+                    <button type="submit" class="btn btn-accent btn-block btn-lg btn-glow">
+                        <i class="fa-solid fa-user-check"></i> Register Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: DEPOSIT WALLET ==================== -->
+    <div class="modal-backdrop" id="deposit-modal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="modal-head-title">
+                    <div class="modal-head-icon icon-emerald"><i class="fa-solid fa-wallet"></i></div>
+                    <div>
+                        <h3>Top Up Wallet Balance</h3>
+                        <span class="modal-subtitle">Instant virtual fund deposit</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="app.closeDepositModal()" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-content-body">
+                <p class="text-muted mb-3">Choose a quick amount or enter a custom amount:</p>
+                <div class="quick-deposit-grid">
+                    <button type="button" class="btn btn-outline" onclick="app.quickDeposit(50)">+$50</button>
+                    <button type="button" class="btn btn-outline" onclick="app.quickDeposit(100)">+$100</button>
+                    <button type="button" class="btn btn-outline" onclick="app.quickDeposit(250)">+$250</button>
+                    <button type="button" class="btn btn-outline" onclick="app.quickDeposit(1000)">+$1,000</button>
+                </div>
+                <form onsubmit="app.handleCustomDeposit(event)" class="mt-4">
+                    <div class="input-field-group">
+                        <label>Custom Amount ($)</label>
+                        <input type="number" id="deposit-amount-input" min="1" step="1" placeholder="e.g. 500" required>
+                    </div>
+                    <button type="submit" class="btn btn-accent btn-block btn-lg btn-glow">
+                        <i class="fa-solid fa-circle-check"></i> Deposit Funds Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: ADD / EDIT PRODUCT ==================== -->
+    <div class="modal-backdrop" id="product-modal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="modal-head-title">
+                    <div class="modal-head-icon icon-indigo"><i class="fa-solid fa-box"></i></div>
+                    <div>
+                        <h3 id="product-modal-title">Add New Product</h3>
+                        <span class="modal-subtitle">Enter catalog product details</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="app.closeProductModal()" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-content-body">
+                <form id="product-form" onsubmit="app.handleSaveProduct(event)">
+                    <input type="hidden" id="prod-edit-id">
+                    <div class="input-field-group">
+                        <label>Product Title</label>
+                        <input type="text" id="prod-name" required placeholder="e.g. Organic Cold Pressed Olive Oil">
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label>Category</label>
+                            <select id="prod-category" required class="custom-form-select">
+                                <option value="DAIRY_PRODUCTS">Dairy Products</option>
+                                <option value="MEAT">Meat & Poultry</option>
+                                <option value="VEGETABLES">Fresh Vegetables</option>
+                                <option value="FRUITS">Organic Fruits</option>
+                                <option value="BAKERY">Bakery & Bread</option>
+                                <option value="BEVERAGES">Beverages</option>
+                                <option value="SNACKS">Snacks & Bites</option>
+                                <option value="FROZEN_FOOD">Frozen Foods</option>
+                                <option value="CANNED_FOOD">Canned Goods</option>
+                                <option value="CLEANING_PRODUCTS">Cleaning Supplies</option>
+                                <option value="PERSONAL_CARE">Personal Care</option>
+                            </select>
+                        </div>
+                        <div class="input-field-group">
+                            <label>Unit Price ($)</label>
+                            <input type="number" id="prod-price" required min="0.01" step="0.01" placeholder="4.99">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label>Stock Quantity (Units)</label>
+                            <input type="number" id="prod-stock" required min="0" step="1" placeholder="50">
+                        </div>
+                        <div class="input-field-group">
+                            <label>Image URL</label>
+                            <input type="url" id="prod-image" placeholder="https://images.unsplash.com/..." oninput="app.previewProductImage(this.value)">
+                        </div>
+                    </div>
+                    <div class="img-preview-box" id="prod-img-preview-wrap">
+                        <img id="prod-img-preview" src="" alt="Image preview" style="display: none;">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg btn-glow mt-3">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Product
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: ADD / EDIT USER ==================== -->
+    <div class="modal-backdrop" id="user-modal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="modal-head-title">
+                    <div class="modal-head-icon icon-indigo"><i class="fa-solid fa-user-pen"></i></div>
+                    <div>
+                        <h3 id="user-modal-title">Edit User Profile</h3>
+                        <span class="modal-subtitle">User personal and balance settings</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="app.closeUserModal()" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-content-body">
+                <form id="user-form" onsubmit="app.handleSaveUser(event)">
+                    <input type="hidden" id="user-edit-id">
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label>First Name</label>
+                            <input type="text" id="user-edit-name" required placeholder="First Name">
+                        </div>
+                        <div class="input-field-group">
+                            <label>Last Name</label>
+                            <input type="text" id="user-edit-surname" required placeholder="Last Name">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="input-field-group">
+                            <label>Age</label>
+                            <input type="number" id="user-edit-age" placeholder="25" min="1" max="120">
+                        </div>
+                        <div class="input-field-group">
+                            <label>Phone</label>
+                            <input type="text" id="user-edit-phone" placeholder="+1234567890">
+                        </div>
+                    </div>
+                    <div class="input-field-group">
+                        <label>Email Address</label>
+                        <input type="email" id="user-edit-email" required placeholder="user@example.com">
+                    </div>
+                    <div class="input-field-group">
+                        <label>Wallet Balance ($)</label>
+                        <input type="number" id="user-edit-balance" min="0" step="0.01" placeholder="1000.00">
+                    </div>
+                    <div class="input-field-group">
+                        <label>New Password (Leave empty to keep existing)</label>
+                        <input type="password" id="user-edit-password" placeholder="Enter new password...">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg btn-glow mt-3">
+                        <i class="fa-solid fa-floppy-disk"></i> Save User Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="/js/app.js"></script>
+</body>
+</html>

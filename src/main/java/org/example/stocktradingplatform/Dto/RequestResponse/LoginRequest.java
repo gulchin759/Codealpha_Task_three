@@ -5,24 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
-public class UserRequestDto {
-
-    private String name;
-    private  String surname;
-    private  String age;
-    private String phoneNumber;
-    private  String email;
-    private BigDecimal balance;
+public class LoginRequest {
+    private String email;
     private String password;
-
-
-
-
 }

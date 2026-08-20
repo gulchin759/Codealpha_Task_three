@@ -25,19 +25,14 @@ public class BaskerService {
     private final UserReposity userReposity;
     private final BasketReposity basketReposity;
     private final ProductReposity productReposity;
-    private  final BasketItemRepository basketItemRepository;
+    private final BasketItemRepository basketItemRepository;
 
     public BaskerService(UserReposity userReposity, BasketReposity basketReposity, ProductReposity productReposity, BasketItemRepository basketItemRepository) {
         this.userReposity = userReposity;
         this.basketReposity = basketReposity;
         this.productReposity = productReposity;
-        this.basketItemRepository=basketItemRepository;
+        this.basketItemRepository = basketItemRepository;
     }
-
-
-
-
-
 
 
     public void addToBasket(Long userId, Long productId, Integer itemCount) {
@@ -96,10 +91,6 @@ public class BaskerService {
     }
 
 
-
-
-
-
     public List<Product> getAlL(Long userId) {
 
         List<BasketItem> items =
@@ -111,16 +102,14 @@ public class BaskerService {
     }
 
 
-
-
-    public List<Product> getFindByName(Long userId, String name){
+    public List<Product> getFindByName(Long userId, String name) {
         Userr user = userReposity.findById(userId).orElseThrow(() -> new UserrNotFind(" User not find  :("));
 
-        Basket basket=user.getBasket();
+        Basket basket = user.getBasket();
 
 
-        if(basket==null){
-            return  new ArrayList<>();
+        if (basket == null) {
+            return new ArrayList<>();
         }
 
         return basketItemRepository.findByBasketIdAndProductNameContainingIgnoreCase(basket.getId(), name)
@@ -130,16 +119,32 @@ public class BaskerService {
     }
 
 
-    @Scheduled(fixedRate = 5 * 60 * 1000)
-    @Transactional
-    public void clearBasketItems() {
-
-        List<BasketItem> items = basketItemRepository.findAll();
-
-        basketItemRepository.deleteAll(items);
+    public void removeFromBasket(Long userId, Long productId) {
+        Userr user = userReposity.findById(userId)
+                .orElseThrow(() -> new UserrNotFind("User not found"));
+        Basket basket = user.getBasket();
+        if (basket != null) {
+            Optional<BasketItem> itemOpt = basket.getItems().stream()
+                    .filter(item -> item.getProduct().getId().equals(productId))
+                    .findFirst();
+            if (itemOpt.isPresent()) {
+                BasketItem item = itemOpt.get();
+                basket.getItems().remove(item);
+                basketItemRepository.delete(item);
+                basketReposity.save(basket);
+            }
+        }
     }
 
+    public List<BasketItem> getBasketItems(Long userId) {
+        return basketItemRepository.findByBasket_Userr_Id(userId);
+    }
 
+    // Optional manual clear
+    public void clearBasket(Long userId) {
+        List<BasketItem> items = basketItemRepository.findByBasket_Userr_Id(userId);
+        basketItemRepository.deleteAll(items);
+    }
 
 
     @Transactional
@@ -153,7 +158,7 @@ public class BaskerService {
 
         List<BasketItem> items = basket.getItems();
 
-        if (items.size()==0) {
+        if (items.size() == 0) {
             throw new RuntimeException("Basket is empty");
         }
 
@@ -196,20 +201,17 @@ public class BaskerService {
             productReposity.save(product);
         }
 
-        // User-i save et
+
         userReposity.save(user);
 
-        // Basket-dən məhsulları sil
-        basketItemRepository.deleteAll(items);
+
+        basket.getItems().clear();
+
+
+        basketReposity.save(basket);
 
         return "Payment successful";
     }
-
-
-
-
-
-
 
 
 }

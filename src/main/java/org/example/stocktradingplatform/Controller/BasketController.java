@@ -38,9 +38,27 @@ public class BasketController {
     }
 
 
+    @GetMapping("/items/{userId}")
+    public List<org.example.stocktradingplatform.Entity.BasketItem> getBasketItems(@PathVariable Long userId) {
+        return basketService.getBasketItems(userId);
+    }
+
+    @DeleteMapping("/remove/{userId}/{productId}")
+    public ResponseEntity<String> removeFromBasket(@PathVariable Long userId, @PathVariable Long productId) {
+        basketService.removeFromBasket(userId, productId);
+        return ResponseEntity.ok("Item removed from basket");
+    }
+
+    @DeleteMapping("/clear/{userId}")
+    public ResponseEntity<String> clearBasket(@PathVariable Long userId) {
+        basketService.clearBasket(userId);
+        return ResponseEntity.ok("Basket cleared");
+    }
+
     @PostMapping("/payment/{userId}")
-    public String payment(@PathVariable Long userId) {
-        return basketService.payment(userId);
+    public ResponseEntity<String> payment(@PathVariable Long userId) {
+        String result = basketService.payment(userId);
+        return ResponseEntity.ok(result);
     }
 
 

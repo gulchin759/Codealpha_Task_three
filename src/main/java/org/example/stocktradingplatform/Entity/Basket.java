@@ -26,10 +26,12 @@ public class Basket {
     @OneToOne(mappedBy = "basket")
     private Userr userr;
 
-    @OneToMany(mappedBy = "basket", cascade = CascadeType.ALL)
+    @OneToMany(
+            mappedBy = "basket",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     @JsonIgnore
     private List<BasketItem> items = new ArrayList<>();
-
-
 
 }
